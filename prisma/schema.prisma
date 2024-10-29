@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Servico {
+  id              Int      @id @default(autoincrement())
+  nome            String   @db.VarChar(60)
+  tempo           Int      @db.SmallInt
+  preco           Decimal  @db.Decimal(10, 2)
+  foto            String
+  agendamentos    Agendamento[]
+  @@map("servicos")
+}
+
+model Cliente {
+  id                String   @db.VarChar(36) @id @default(uuid())
+  nome              String   @db.VarChar(60)
+  email             String   @db.VarChar(60) @unique
+  senha             String   @db.VarChar(60)
+  codigoRecuperacao String? // Novo campo para código de recuperação
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  agendamentos      Agendamento[]
+  @@map("clientes")
+}
+
+model Profissional {
+  id             Int            @id @default(autoincrement())
+  nome           String         @db.VarChar(60)
+  especialidade  String
+  foto           String
+  @@map("profissionais")
+}
+
+model Agendamento {
+  id          Int       @id @default(autoincrement())
+  cliente     Cliente   @relation(fields: [clienteId], references: [id])
+  clienteId   String    @db.VarChar(36)
+  servico     Servico   @relation(fields: [servicoId], references: [id])
+  servicoId   Int
+  descricao   String    @db.VarChar(255)
+  resposta    String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt  
+  @@map("propostas")
+}
